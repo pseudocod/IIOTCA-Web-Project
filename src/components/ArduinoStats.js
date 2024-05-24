@@ -9,7 +9,7 @@ import {
   FaTachometerAlt,
   FaCloudRain,
 } from "react-icons/fa";
-import database from "../firebaseConfig";
+import { database } from "../firebaseConfig";
 
 const getTemperatureIcon = (temperature) => {
   if (temperature < 10) {
@@ -90,7 +90,7 @@ const ArduinoStats = () => {
   return (
     <div style={styles.scrollContainer}>
       {error && <p style={styles.errorText}>{error}</p>}
-      <div style={styles.header}>Welcome to IoT Weather Forecast Channel</div>
+      <div style={styles.header}>Weather Forecast</div>
       <div style={styles.dataContainer}>
         <div style={styles.dataRow}>
           <p style={styles.dataText}>

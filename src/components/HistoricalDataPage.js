@@ -1,9 +1,8 @@
-// HistoricalDataPage.js
 import React, { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
 import { ref, onValue } from "firebase/database";
-import database from "../firebaseConfig";
+import { database } from "../firebaseConfig";
 
 // Register Chart.js components
 Chart.register(...registerables);
@@ -15,22 +14,22 @@ const HistoricalDataPage = () => {
     const dbRef = ref(database, "Status");
     onValue(dbRef, (snapshot) => {
       const tempData = [];
-      let index = 0;
       snapshot.forEach((childSnapshot) => {
         const childData = childSnapshot.val();
-        console.log("Child Data:", childData); // Log the child data
         tempData.push({
-          id: index++, // Use an incremental number as the label
           temperature: childData.Temperature,
           humidity: childData.Humidity,
         });
       });
-      console.log("Temp Data:", tempData); // Log the temp data
-      setData(tempData);
+      // Slice the last 50 entries
+      const last50Data = tempData
+        .slice(-50)
+        .map((item, index) => ({ id: index + 1, ...item }));
+      setData(last50Data);
     });
   }, []);
 
-  const chartData = {
+  const temperatureChartData = {
     labels: data.map((d) => d.id), // Use the incremental numbers as labels
     datasets: [
       {
@@ -40,6 +39,12 @@ const HistoricalDataPage = () => {
         borderWidth: 2,
         fill: false,
       },
+    ],
+  };
+
+  const humidityChartData = {
+    labels: data.map((d) => d.id), // Use the incremental numbers as labels
+    datasets: [
       {
         label: "Humidity",
         data: data.map((d) => d.humidity),
@@ -49,8 +54,6 @@ const HistoricalDataPage = () => {
       },
     ],
   };
-
-  console.log("Chart Data:", chartData); // Log chart data
 
   const options = {
     scales: {
@@ -63,7 +66,14 @@ const HistoricalDataPage = () => {
   return (
     <div style={styles.container}>
       <h1 style={styles.header}>Historical Weather Data</h1>
-      <Line data={chartData} options={options} />
+      <div style={styles.chartContainer}>
+        <h2 style={styles.subHeader}>Temperature Data</h2>
+        <Line data={temperatureChartData} options={options} />
+      </div>
+      <div style={styles.chartContainer}>
+        <h2 style={styles.subHeader}>Humidity Data</h2>
+        <Line data={humidityChartData} options={options} />
+      </div>
     </div>
   );
 };
@@ -74,6 +84,15 @@ const styles = {
   },
   header: {
     fontSize: "36px",
+    margin: "20px 0",
+    textAlign: "center",
+  },
+  subHeader: {
+    fontSize: "24px",
+    margin: "10px 0",
+    textAlign: "center",
+  },
+  chartContainer: {
     margin: "20px 0",
   },
 };
